@@ -5,3 +5,12 @@ spring:
     url: jdbc:mysql://localhost:3306/big_event
     username: root
     password: 050120877633
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.backend.entity
+#  mapper-locations:
+  configuration:
+    map-underscore-to-camel-case: true
+
+
+

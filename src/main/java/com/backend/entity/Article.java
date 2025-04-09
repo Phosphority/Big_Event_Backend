@@ -17,7 +17,7 @@ public class Article {
     private String content;
     private Integer categoryId;
     private Integer createUser;
-    private String imageUrl;
+    private String coverImg;
     private String state;
     private LocalDateTime updateTime;
     private LocalDateTime deleteTime;
