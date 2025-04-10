@@ -5,10 +5,7 @@ import com.backend.entity.Result;
 import com.backend.entity.Test01;
 import com.backend.service.CategoryService;
 import jakarta.annotation.Resource;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -18,6 +15,25 @@ public class CategoryController {
 
     @Resource
     private CategoryService categoryService;
+
+    @PostMapping
+    public Result add(@RequestBody Category category) {
+
+        if(categoryService.add(category)){
+            return Result.success();
+        }
+        return Result.error("fail");
+    }
+
+    @GetMapping
+    public Result<List<Category>> getList() {
+
+        List<Category> categoryList = categoryService.getList();
+        if(categoryList == null || categoryList.isEmpty()){
+            return Result.success(categoryList);
+        }
+        return Result.error("fail");
+    }
 
 
     @DeleteMapping("/batchDelete")
@@ -29,6 +45,4 @@ public class CategoryController {
 //        }
         return Result.error("删除失败");
     }
-
-
 }

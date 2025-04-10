@@ -36,6 +36,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean update(User user) {
+        Map<String,Object> claims = ThreadLocalUtil.get();
+        Integer id = (Integer) claims.get("id");
+        user.setId(id);
         return userMapper.update(user);
     }
 

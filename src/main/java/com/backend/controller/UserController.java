@@ -78,10 +78,8 @@ public class UserController {
     }
 
     @PutMapping("/update")
-    public Result update(@Validated @RequestBody User user, @RequestHeader("Authorization") String token) {
+    public Result update(@Validated @RequestBody User user) {
 
-        Map<String, Object> map = JwtUtil.parseToken(token);
-        user.setId((Integer)map.get("id"));
         if(userService.update(user)){
             return Result.success("更新成功");
         }
@@ -99,9 +97,7 @@ public class UserController {
 
 
     @PatchMapping("/updatePwd")
-    public Result updatePassword(
-            @RequestBody Map<String,String> pwds
-    ) {
+    public Result updatePassword(@RequestBody Map<String,String> pwds) {
 
         Map<String,Object> claims = ThreadLocalUtil.get();
         User user = userService.findByName(claims.get("username").toString());
