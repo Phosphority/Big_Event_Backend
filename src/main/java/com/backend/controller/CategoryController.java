@@ -1,10 +1,12 @@
 package com.backend.controller;
 
 import com.backend.entity.Category;
+import com.backend.entity.PageBean;
 import com.backend.entity.Result;
 import com.backend.entity.Test01;
 import com.backend.service.CategoryService;
 import jakarta.annotation.Resource;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,7 +19,7 @@ public class CategoryController {
     private CategoryService categoryService;
 
     @PostMapping
-    public Result add(@RequestBody Category category) {
+    public Result add(@Validated(Category.addCategory.class) @RequestBody Category category) {
 
         if(categoryService.add(category)){
             return Result.success();
@@ -26,23 +28,52 @@ public class CategoryController {
     }
 
     @GetMapping
-    public Result<List<Category>> getList() {
+    public Result<PageBean<Category>> getList(
+            @RequestParam(required = true) Integer pageNum,
+            @RequestParam(required = true) Integer pageSize
+    ) {
 
-        List<Category> categoryList = categoryService.getList();
-        if(categoryList == null || categoryList.isEmpty()){
-            return Result.success(categoryList);
+        PageBean<Category> categoryPageBean = categoryService.getList(pageNum,pageSize);
+        if(categoryPageBean != null){
+            return Result.success(categoryPageBean);
         }
         return Result.error("fail");
     }
 
+    @PutMapping
+    public Result update(@Validated(Category.updateCategory.class) @RequestBody Category category) {
+
+        if(categoryService.update(category)){
+            return Result.success();
+        }
+        return Result.error("fail");
+    }
+
+    @GetMapping("/detail")
+    public Result<Category> getDetail(@RequestParam Integer id) {
+
+        Category category = categoryService.getDetail(id);
+        if(category != null){
+            return Result.success(category);
+        }
+        return Result.error("fail");
+    }
+
+    @DeleteMapping
+    public Result delete(@RequestParam Integer id) {
+
+        if(categoryService.delete(id)){
+            return Result.success();
+        }
+        return Result.error("fail");
+    }
 
     @DeleteMapping("/batchDelete")
-    public Result batchDelete(@RequestBody List<Test01> test01List) {
+    public Result batchDelete(@RequestBody List<Integer> ids) {
 
-        System.out.println(test01List);
-//        if(categoryService.batchDelete()){
-//            return Result.success();
-//        }
-        return Result.error("删除失败");
+        if(categoryService.batchDelete(ids)){
+            return Result.success();
+        }
+        return Result.error("fail");
     }
 }

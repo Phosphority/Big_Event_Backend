@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.backend.mapper.ArticleMapper">
+
+    <select id="getList">
+        select * from article
+            <where>
+                create_user = #{createUser}
+                <if test="categoryId != null and categoryId > 0">
+                    and category_id = #{categoryId}
+                </if>
+                <if test="state != null and state != ''">
+                    and state = #{state}
+                </if>
+            </where>
+    </select>
+    <delete id="batchDelete">
+        delete from article where id in
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
+
+
+
+
+
+
+
