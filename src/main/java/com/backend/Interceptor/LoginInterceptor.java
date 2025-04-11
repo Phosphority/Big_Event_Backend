@@ -1,7 +1,9 @@
 package com.backend.Interceptor;
 
 import com.backend.utils.JwtUtil;
+import com.backend.utils.RedisUtil;
 import com.backend.utils.ThreadLocalUtil;
+import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
@@ -11,6 +13,11 @@ import java.util.Map;
 
 @Component
 public class LoginInterceptor implements HandlerInterceptor {
+
+    @Resource
+    private RedisUtil redisUtil;
+
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
@@ -19,9 +26,15 @@ public class LoginInterceptor implements HandlerInterceptor {
             if(token != null){
                 // 1.先解析token为claims
                 Map<String, Object> claims = JwtUtil.parseToken(token);
-                // 2.然后再放入线程中
-                ThreadLocalUtil.set(claims);
-                return true;
+                String redisToken = redisUtil.get(token);
+                // 2.如果存在就说明redis中存储的token与请求上来的token一致
+                if(redisToken != null){
+                    // 3.然后再放入线程中
+                    ThreadLocalUtil.set(claims);
+                    return true;
+                }else {
+                    throw new RuntimeException();
+                }
             }else {
                 throw new RuntimeException();
             }

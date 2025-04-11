@@ -6,6 +6,12 @@ spring:
     username: root
 #    password: 050120877633
     password: 1911
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 0
+      timeout: 3000
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.backend.entity
@@ -17,5 +23,4 @@ pagehelper:
   reasonable: true
   support-methods-arguments: true
   params: count=countSql
-
 

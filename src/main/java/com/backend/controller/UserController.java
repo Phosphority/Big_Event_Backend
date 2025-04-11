@@ -4,10 +4,7 @@ import com.backend.entity.Result;
 import com.backend.entity.User;
 import com.backend.mapper.UserMapper;
 import com.backend.service.UserService;
-import com.backend.utils.BCryptUtil;
-import com.backend.utils.JwtUtil;
-import com.backend.utils.Md5Util;
-import com.backend.utils.ThreadLocalUtil;
+import com.backend.utils.*;
 import jakarta.annotation.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -33,6 +30,8 @@ public class UserController {
 
     @Resource
     private UserService userService;
+    @Resource
+    private RedisUtil redisUtil;
 
 
     @PostMapping("/register")
@@ -65,9 +64,21 @@ public class UserController {
             claims.put("id", user.getId());
             claims.put("username", username);
             String token = JwtUtil.getToken(claims);
+            // 3.将token存入Redis中,并且以token为key值
+            redisUtil.set(token, token);
             return Result.success(token);
         }
         return Result.error("登录失败");
+    }
+
+    @PostMapping("/logout")
+    public Result logout(@RequestHeader("Authorization")String oldToken) {
+
+        redisUtil.delete(oldToken);
+        if(redisUtil.get(oldToken) == null) {
+            return Result.success();
+        }
+        return Result.error("fail");
     }
 
     @GetMapping("/userInfo")
@@ -95,24 +106,25 @@ public class UserController {
         return Result.error("更新失败");
     }
 
-
     @PatchMapping("/updatePwd")
-    public Result updatePassword(@RequestBody Map<String,String> pwds) {
+    public Result updatePassword(@RequestBody Map<String,String> pwds,@RequestHeader("Authorization") String oldToken) {
 
         Map<String,Object> claims = ThreadLocalUtil.get();
         User user = userService.findByName(claims.get("username").toString());
-
+        // 1.更新数据库中的密码
         if(!(Md5Util.checkPassword(pwds.get("old_pwd"),user.getPassword()))) {
             return Result.error("密码错误");
         }else if(!(pwds.get("new_pwd").equals(pwds.get("re_pwd")))){
             return Result.error("两次密码不一致");
-        }else if(userService.updatePassword(pwds.get("re_pwd"))){
+        }else if(userService.updatePassword(Md5Util.getMD5String(pwds.get("re_pwd")))){
+            // 2.更新redis所存储的密码
+            redisUtil.delete(oldToken);
+            String newToken = JwtUtil.getToken(claims);
+            redisUtil.set(newToken,newToken);
             return Result.success();
         }
         return Result.error("更新失败");
     }
-
-
 }
 
 
