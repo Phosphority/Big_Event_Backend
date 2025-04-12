@@ -6,10 +6,12 @@ import com.backend.service.UserService;
 import com.backend.utils.ThreadLocalUtil;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 
 @Service
+@Transactional
 public class UserServiceImpl implements UserService {
 
     // 1.首先考虑修改时间与创建时间
@@ -55,6 +57,4 @@ public class UserServiceImpl implements UserService {
         Integer id = (Integer) claims.get("id");
         return userMapper.updatePassword(newPwd,id);
     }
-
-
 }
